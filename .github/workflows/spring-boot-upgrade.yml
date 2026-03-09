@@ -1,0 +1,44 @@
+name: Spring Boot 3.5 Upgrade
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install Moderne CLI
+        run: |
+          curl -s https://repo1.maven.org/maven2/io/moderne/moderne-cli/LATEST --output /dev/null -w '%{redirect_url}' \
+            | xargs -I {} dirname {} \
+            | xargs -I {} curl -s {}/moderne-cli-$(basename {}).jar --output "${{ runner.temp }}/mod.jar"
+          printf '#!/bin/bash\njava -jar "${{ runner.temp }}/mod.jar" "$@"\n' > /usr/local/bin/mod
+          chmod +x /usr/local/bin/mod
+
+      - name: Install recipe dependencies
+        run: mod config recipes jar install io.moderne.recipe:rewrite-spring:LATEST
+
+      - name: Build LSTs
+        run: mod build .
+
+      - name: Run Spring Boot 3.5 upgrade recipe
+        run: mod run . --recipe io.moderne.java.spring.boot3.UpgradeSpringBoot_3_5
+
+      - name: Apply recipe changes
+        run: mod git apply . --last-recipe-run
+
+      - name: Verify changes with build tool
+        run: mod exec . --last-recipe-run -- $MODERNE_BUILD_TOOL_CHECK
