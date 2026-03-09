@@ -1,0 +1,7 @@
+rootProject.name = 'spring-boot-multi-project'
+
+include 'domain'
+include 'persistence'
+include 'service'
+include 'api'
+include 'web'
