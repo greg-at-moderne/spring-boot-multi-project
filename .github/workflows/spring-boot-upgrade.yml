@@ -26,8 +26,9 @@ jobs:
             | grep '<release>' | sed 's/.*<release>\(.*\)<\/release>.*/\1/')
           curl -s "https://repo1.maven.org/maven2/io/moderne/moderne-cli/${VERSION}/moderne-cli-${VERSION}.jar" \
             --output "${{ runner.temp }}/mod.jar"
-          printf '#!/bin/bash\njava -jar "${{ runner.temp }}/mod.jar" "$@"\n' > /usr/local/bin/mod
-          chmod +x /usr/local/bin/mod
+          printf '#!/bin/bash\njava -jar "%s" "$@"\n' "${{ runner.temp }}/mod.jar" > "${{ runner.temp }}/mod"
+          chmod +x "${{ runner.temp }}/mod"
+          echo "${{ runner.temp }}" >> "$GITHUB_PATH"
 
       - name: Install recipe dependencies
         run: mod config recipes jar install io.moderne.recipe:rewrite-spring:LATEST
