@@ -22,9 +22,10 @@ jobs:
 
       - name: Install Moderne CLI
         run: |
-          curl -s https://repo1.maven.org/maven2/io/moderne/moderne-cli/LATEST --output /dev/null -w '%{redirect_url}' \
-            | xargs -I {} dirname {} \
-            | xargs -I {} curl -s {}/moderne-cli-$(basename {}).jar --output "${{ runner.temp }}/mod.jar"
+          VERSION=$(curl -s https://repo1.maven.org/maven2/io/moderne/moderne-cli/maven-metadata.xml \
+            | grep '<release>' | sed 's/.*<release>\(.*\)<\/release>.*/\1/')
+          curl -s "https://repo1.maven.org/maven2/io/moderne/moderne-cli/${VERSION}/moderne-cli-${VERSION}.jar" \
+            --output "${{ runner.temp }}/mod.jar"
           printf '#!/bin/bash\njava -jar "${{ runner.temp }}/mod.jar" "$@"\n' > /usr/local/bin/mod
           chmod +x /usr/local/bin/mod
 
