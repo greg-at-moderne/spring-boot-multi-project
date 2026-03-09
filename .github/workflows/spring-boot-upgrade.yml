@@ -3,6 +3,9 @@ name: Spring Boot 3.5 Upgrade
 on:
   push:
 
+env:
+  MOD: java -jar ${{ runner.temp }}/mod.jar
+
 jobs:
   upgrade:
     runs-on: ubuntu-latest
@@ -26,21 +29,18 @@ jobs:
             | grep '<release>' | sed 's/.*<release>\(.*\)<\/release>.*/\1/')
           curl -s "https://repo1.maven.org/maven2/io/moderne/moderne-cli/${VERSION}/moderne-cli-${VERSION}.jar" \
             --output "${{ runner.temp }}/mod.jar"
-          printf '#!/bin/bash\njava -jar "%s" "$@"\n' "${{ runner.temp }}/mod.jar" > "${{ runner.temp }}/mod"
-          chmod +x "${{ runner.temp }}/mod"
-          echo "${{ runner.temp }}" >> "$GITHUB_PATH"
 
       - name: Install recipe dependencies
-        run: mod config recipes jar install io.moderne.recipe:rewrite-spring:LATEST
+        run: $MOD config recipes jar install io.moderne.recipe:rewrite-spring:LATEST
 
       - name: Build LSTs
-        run: mod build .
+        run: $MOD build .
 
       - name: Run Spring Boot 3.5 upgrade recipe
-        run: mod run . --recipe io.moderne.java.spring.boot3.UpgradeSpringBoot_3_5
+        run: $MOD run . --recipe io.moderne.java.spring.boot3.UpgradeSpringBoot_3_5
 
       - name: Apply recipe changes
-        run: mod git apply . --last-recipe-run
+        run: $MOD git apply . --last-recipe-run
 
       - name: Verify changes with build tool
-        run: mod exec . --last-recipe-run -- $MODERNE_BUILD_TOOL_CHECK
+        run: $MOD exec . --last-recipe-run -- $MODERNE_BUILD_TOOL_CHECK
