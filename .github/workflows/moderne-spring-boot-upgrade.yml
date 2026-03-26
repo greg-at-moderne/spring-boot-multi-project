@@ -23,8 +23,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-disabled: true
 
       - name: Install Moderne CLI
         run: |
@@ -42,6 +40,9 @@ jobs:
 
       - name: Run Spring Boot 3.5 upgrade recipe
         run: mod run . --recipe io.moderne.java.spring.boot3.UpgradeSpringBoot_3_5
+
+      - name: Restore Gradle wrapper JAR to match git OID expected by binary patch
+        run: git checkout gradle/wrapper/gradle-wrapper.jar
 
       - name: Apply recipe changes
         run: mod git apply . --last-recipe-run
