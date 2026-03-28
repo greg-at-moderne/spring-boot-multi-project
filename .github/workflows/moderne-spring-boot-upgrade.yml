@@ -9,7 +9,11 @@ env:
 
 jobs:
   upgrade:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Checkout code
@@ -24,13 +28,25 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Install Moderne CLI
+      - name: Install Moderne CLI (Linux)
+        if: runner.os == 'Linux'
         run: |
           curl -sSL -o mod.jar https://repo1.maven.org/maven2/io/moderne/moderne-cli/${{ env.MODERNE_CLI_VERSION }}/moderne-cli-${{ env.MODERNE_CLI_VERSION }}.jar
           echo '#!/bin/bash' > mod
           echo 'java -jar '"$GITHUB_WORKSPACE"'/mod.jar "$@"' >> mod
           chmod +x mod
           echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
+
+      - name: Install Moderne CLI (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/io/moderne/moderne-cli/${{ env.MODERNE_CLI_VERSION }}/moderne-cli-${{ env.MODERNE_CLI_VERSION }}.jar" -OutFile mod.jar
+          @"
+          @echo off
+          java -jar "${{ github.workspace }}\mod.jar" %*
+          "@ | Set-Content -Path mod.cmd
+          echo "${{ github.workspace }}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
       - name: Install recipe dependencies
         run: mod config recipes jar install io.moderne.recipe:rewrite-spring:${{ env.REWRITE_SPRING_VERSION }}
