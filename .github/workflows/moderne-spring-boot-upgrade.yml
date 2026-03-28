@@ -48,6 +48,9 @@ jobs:
           "@ | Set-Content -Path mod.cmd
           echo "${{ github.workspace }}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
+      - name: Configure CLI to use JDK 25
+        run: mod config java version edit 25
+
       - name: Install recipe dependencies
         run: mod config recipes jar install io.moderne.recipe:rewrite-spring:${{ env.REWRITE_SPRING_VERSION }}
 
