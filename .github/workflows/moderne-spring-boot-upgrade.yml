@@ -39,10 +39,10 @@ jobs:
         run: mod build . --no-download
 
       - name: Run Spring Boot 3.5 upgrade recipe
-        run: mod run ./web --recipe io.moderne.java.spring.boot3.UpgradeSpringBoot_3_5
+        run: mod run . --recipe io.moderne.java.spring.boot3.UpgradeSpringBoot_3_5
 
       - name: Apply recipe changes
-        run: mod git apply ./web --last-recipe-run
+        run: mod git apply . --last-recipe-run
 
       - name: Rebuild LSTs
         run: mod build . --no-download
