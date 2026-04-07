@@ -19,6 +19,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
       - name: Set up JDK 25
         uses: actions/setup-java@v4
         with:
@@ -48,8 +54,8 @@ jobs:
           "@ | Set-Content -Path mod.cmd
           echo "${{ github.workspace }}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
-      - name: Configure CLI to use JDK 25
-        run: mod config java version edit 25
+      - name: Configure CLI to use JDK 17
+        run: mod config java version edit 17
 
       - name: Install recipe dependencies
         run: mod config recipes jar install io.moderne.recipe:rewrite-spring:${{ env.REWRITE_SPRING_VERSION }}
