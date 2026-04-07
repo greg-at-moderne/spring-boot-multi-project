@@ -74,3 +74,11 @@ jobs:
 
       - name: Verify changes with build tool
         run: mod exec . --last-recipe-run -- $MODERNE_BUILD_TOOL_CHECK
+
+      - name: Upload Moderne build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moderne-build-logs-${{ matrix.os }}
+          path: .moderne/build/**
+          if-no-files-found: ignore
