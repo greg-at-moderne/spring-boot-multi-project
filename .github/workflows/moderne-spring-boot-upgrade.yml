@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  MODERNE_CLI_VERSION: "4.1.8"
+  MODERNE_CLI_DEV_VERSION: "4.3.0-SNAPSHOT"
   REWRITE_SPRING_VERSION: "0.31.0"
 
 jobs:
@@ -35,23 +35,31 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Install Moderne CLI (Linux)
+      - name: Checkout Moderne CLI
+        uses: actions/checkout@v4
+        with:
+          repository: moderneinc/moderne-cli
+          path: moderne-cli
+
+      - name: Build Moderne CLI dev fat jar
+        working-directory: moderne-cli
+        run: ./gradlew devFatJar
+
+      - name: Install Moderne CLI wrapper (Linux)
         if: runner.os == 'Linux'
         run: |
-          curl -sSL -o mod.jar https://repo1.maven.org/maven2/io/moderne/moderne-cli/${{ env.MODERNE_CLI_VERSION }}/moderne-cli-${{ env.MODERNE_CLI_VERSION }}.jar
           echo '#!/bin/bash' > mod
-          echo 'java -jar '"$GITHUB_WORKSPACE"'/mod.jar "$@"' >> mod
+          echo 'java -jar '"$GITHUB_WORKSPACE"'/moderne-cli/mod/build/libs/mod-${{ env.MODERNE_CLI_DEV_VERSION }}-dev-fat.jar "$@"' >> mod
           chmod +x mod
           echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
 
-      - name: Install Moderne CLI (Windows)
+      - name: Install Moderne CLI wrapper (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/io/moderne/moderne-cli/${{ env.MODERNE_CLI_VERSION }}/moderne-cli-${{ env.MODERNE_CLI_VERSION }}.jar" -OutFile mod.jar
           @"
           @echo off
-          java -jar "${{ github.workspace }}\mod.jar" %*
+          java -jar "${{ github.workspace }}\moderne-cli\mod\build\libs\mod-${{ env.MODERNE_CLI_DEV_VERSION }}-dev-fat.jar" %*
           "@ | Set-Content -Path mod.cmd
           echo "${{ github.workspace }}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
