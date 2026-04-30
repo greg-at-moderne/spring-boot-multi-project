@@ -44,6 +44,9 @@ jobs:
 
       - name: Build Moderne CLI dev fat jar
         working-directory: moderne-cli
+        env:
+          MODERNE_ARTIFACTORY_USERNAME: ${{ secrets.MODERNE_ARTIFACTORY_USERNAME }}
+          MODERNE_ARTIFACTORY_PASSWORD: ${{ secrets.MODERNE_ARTIFACTORY_PASSWORD }}
         run: ./gradlew devFatJar
 
       - name: Install Moderne CLI wrapper
