@@ -5,7 +5,6 @@ on:
   workflow_dispatch:
 
 env:
-  MODERNE_CLI_DEV_VERSION: "4.3.0-SNAPSHOT"
   REWRITE_SPRING_VERSION: "0.31.0"
 
 jobs:
@@ -47,12 +46,15 @@ jobs:
         env:
           MODERNE_ARTIFACTORY_USERNAME: ${{ secrets.MODERNE_ARTIFACTORY_USERNAME }}
           MODERNE_ARTIFACTORY_PASSWORD: ${{ secrets.MODERNE_ARTIFACTORY_PASSWORD }}
-        run: ./gradlew devFatJar
+        run: |
+          ./gradlew devFatJar
+          jar=$(ls mod/build/libs/mod-*-dev-fat.jar | head -n1)
+          echo "MODERNE_CLI_JAR=$GITHUB_WORKSPACE/moderne-cli/$jar" >> "$GITHUB_ENV"
 
       - name: Install Moderne CLI wrapper
         run: |
           echo '#!/bin/bash' > mod
-          echo 'java -jar '"$GITHUB_WORKSPACE"'/moderne-cli/mod/build/libs/mod-${{ env.MODERNE_CLI_DEV_VERSION }}-dev-fat.jar "$@"' >> mod
+          echo 'java -jar '"$MODERNE_CLI_JAR"' "$@"' >> mod
           chmod +x mod
           echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
 
