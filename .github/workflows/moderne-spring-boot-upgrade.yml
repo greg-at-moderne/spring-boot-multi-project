@@ -83,3 +83,11 @@ jobs:
           name: moderne-build-logs-${{ matrix.os }}
           path: .moderne/build/**
           if-no-files-found: ignore
+
+      - name: Upload Moderne logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moderne-logs-${{ matrix.os }}
+          path: .moderne/*/*.log
+          if-no-files-found: ignore
