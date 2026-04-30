@@ -40,6 +40,7 @@ jobs:
         with:
           repository: moderneinc/moderne-cli
           path: moderne-cli
+          token: ${{ secrets.MODERNE_CLI_TOKEN }}
 
       - name: Build Moderne CLI dev fat jar
         working-directory: moderne-cli
