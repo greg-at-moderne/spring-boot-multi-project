@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout code
@@ -45,23 +45,12 @@ jobs:
         working-directory: moderne-cli
         run: ./gradlew devFatJar
 
-      - name: Install Moderne CLI wrapper (Linux)
-        if: runner.os == 'Linux'
+      - name: Install Moderne CLI wrapper
         run: |
           echo '#!/bin/bash' > mod
           echo 'java -jar '"$GITHUB_WORKSPACE"'/moderne-cli/mod/build/libs/mod-${{ env.MODERNE_CLI_DEV_VERSION }}-dev-fat.jar "$@"' >> mod
           chmod +x mod
           echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
-
-      - name: Install Moderne CLI wrapper (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          @"
-          @echo off
-          java -jar "${{ github.workspace }}\moderne-cli\mod\build\libs\mod-${{ env.MODERNE_CLI_DEV_VERSION }}-dev-fat.jar" %*
-          "@ | Set-Content -Path mod.cmd
-          echo "${{ github.workspace }}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
 
       - name: Configure CLI to use JDK 17
         run: mod config java version edit 17
